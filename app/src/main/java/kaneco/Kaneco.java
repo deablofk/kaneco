@@ -52,12 +52,8 @@ public class Kaneco{
 			.build(new CacheLoader<String, GuildConfig>() {
 				@Override
 				public GuildConfig load(String guildID) {
-					try { 
-						return restApi.getGuildConfig(guildID); 
-					} catch (Exception e){
-						System.out.println("Guild Config Cache Error"); 
-						return null;
-					}
+					GuildConfig guildCfg = restApi.getGuildConfig(guildID); 
+					return guildCfg;
 				}
 			});
 

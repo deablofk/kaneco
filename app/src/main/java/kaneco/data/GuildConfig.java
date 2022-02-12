@@ -17,7 +17,7 @@ public class GuildConfig {
 	private String welcomeRole;
 	private String muteRole;
 	private String banChannel;
-	private List<String> alertRoles = Arrays.asList(new String[3]);
+	private List<String> alertRoles = new ArrayList<>();
 
 	public GuildConfig(String guildId, String ownerId, String prefix) {
 		this.guild = guildId;

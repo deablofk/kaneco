@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
+import se.michaelthelin.spotify.model_objects.specification.TrackSimplified;
 
 public class Play extends Command {
 	
@@ -49,6 +50,28 @@ public class Play extends Command {
 
 							for(int i = 0; i < playlistTracks.length; i++) {
 								PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + playlistTracks[i].getTrack().getName(), false);
+							}
+						}
+						catch(Exception e) { e.printStackTrace(); }
+						break;
+					case "album":
+						try {
+							TrackSimplified[] playlistTracks = Kaneco.spotifyApi.getAlbumsTracks(linkData[1]).build().execute().getItems(); 
+
+							EmbedBuilder embed = new EmbedBuilder();
+							embed.setTitle("Playlist carregada.");
+							embed.setDescription("Foram inseridas: " + playlistTracks.length + " músicas na fila.");
+							embed.setTimestamp(OffsetDateTime.now());
+
+							if(hook() == null){
+								channel.sendMessageEmbeds(embed.build()).queue();
+							}
+							else {
+								hook().editOriginalEmbeds(embed.build()).queue();
+							}
+
+							for(int i = 0; i < playlistTracks.length; i++) {
+								PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + playlistTracks[i].getArtists()[0].getName() + " "+ playlistTracks[i].getName(), false);
 							}
 						}
 						catch(Exception e) { e.printStackTrace(); }

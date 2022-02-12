@@ -18,7 +18,7 @@ public class Ban extends Command{
 		Member memberBan = guild.retrieveMemberById(msgParams[1].replaceAll("[<@!>]", "")).complete();
 
 		if(memberBan != null) {
-			//guild.ban(memberBan, 0, "Banido by " + author.getNickname()).queue();
+			guild.ban(memberBan, 0, "Banido by " + author.getNickname()).queue();
 			embed.setDescription("Usuário **" + memberBan.getUser().getName() + "** foi banido por **" + author.getNickname() + "**");
 			
 			String motivo = String.join(" ", Arrays.copyOfRange(msgParams, 2, msgParams.length));

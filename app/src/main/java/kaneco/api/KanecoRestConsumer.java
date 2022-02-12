@@ -49,11 +49,21 @@ public class KanecoRestConsumer {
 
 	public GuildConfig getGuildConfig(String guildId) {
 		HttpResponse hr = getApiResponse(baseURL +"/guilds/" + guildId, "GET", accessToken, null);
-		String json = null;
+	
+		int statusCode = hr.getStatusLine().getStatusCode();
 
-		try { json = EntityUtils.toString(hr.getEntity()); } catch ( IOException e ) { e.printStackTrace(); return null; }
-		
-		return gson.fromJson(JsonParser.parseString(json).getAsJsonObject().get("data").getAsString(), GuildConfig.class);
+		if (statusCode == 200){
+			String json = null;
+			try { json = EntityUtils.toString(hr.getEntity()); } catch ( IOException e ) { System.out.println("KanecoRestConsumer.java, error on getting guild config from api."); }
+			return gson.fromJson(JsonParser.parseString(json).getAsJsonObject().get("data").getAsString(), GuildConfig.class);
+		}
+		else if (statusCode == 400) {
+			GuildConfig cfg = new GuildConfig(guildId, null, "./");
+			sendGuildConfig(cfg);
+			return cfg;
+		}
+
+		return null;
 	}
 
 	public boolean sendGuildConfig(GuildConfig cfg) {

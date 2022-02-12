@@ -89,8 +89,9 @@ public class KanecoListener extends ListenerAdapter {
 			try{
 				cfg = Kaneco.configCache.get(event.getGuild().getId()); 
 			} catch( ExecutionException e) {
-				cfg = new GuildConfig(event.getGuild().getId(), event.getGuild().getOwnerId(), "./");
-				Kaneco.configCache.put(event.getGuild().getId(), cfg);
+				System.out.println("OnMessageReceived, not possible to get guild config");
+			//	cfg = new GuildConfig(event.getGuild().getId(), event.getGuild().getOwnerId(), "./");
+			//	Kaneco.configCache.put(event.getGuild().getId(), cfg);
 			} 
 
 			if(msg.startsWith(cfg.getGuildPrefix()) && !event.getAuthor().isBot()) {
@@ -169,6 +170,7 @@ public class KanecoListener extends ListenerAdapter {
 		gd.upsertCommand("ban", "bane um determinado usuário.")
 			.addOption(OptionType.USER, "user", "usuário a ser banido", true)
 			.addOption(OptionType.STRING, "motivo", "motivo do banimento", true).queue();
+		gd.upsertCommand("config", "mostra as configurações do servidor.").queue();
 	}
 
 	@Override
@@ -185,6 +187,29 @@ public class KanecoListener extends ListenerAdapter {
 						break;
 					case "nextpage":
 						event.editMessageEmbeds(pagedEmbed.nextPage()).queue();
+						break;
+				}
+			}
+			else {
+				EmbedBuilder eb = new EmbedBuilder(event.getMessage().getEmbeds().get(0));
+				GuildMusicManager gmm = PlayerManager.getInstance().getGuildMusicManger(event.getGuild());
+				String name = event.getMember().getNickname();
+				String avatar = event.getMember().getEffectiveAvatarUrl();
+				switch(event.getButton().getId()){
+					case "next":
+						eb.setFooter("Pulada por: " + name, avatar);
+						gmm.scheduler.nextTrack();
+						event.editMessageEmbeds(eb.build()).queue();
+						break;
+					case "playpause":
+						eb.setFooter((gmm.player.isPaused() + " por: " + name).replace("true", "Despausado").replace("false", "Pausado"), avatar);
+						gmm.scheduler.pauseTrack();
+						event.editMessageEmbeds(eb.build()).queue();
+						break;
+					case "loop":
+						eb.setFooter(("Loop " + !gmm.scheduler.isLoopQueue() + " por: " + name).replace("false", "desativado").replace("true", "ativado"), avatar);
+						gmm.scheduler.setLoopQueue(!gmm.scheduler.isLoopQueue());
+						event.editMessageEmbeds(eb.build()).queue();
 						break;
 				}
 			}
@@ -270,4 +295,5 @@ public class KanecoListener extends ListenerAdapter {
             manager.scheduler.stop();
 		}
 	}
+
 }
