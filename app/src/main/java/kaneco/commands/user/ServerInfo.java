@@ -22,9 +22,6 @@ public class ServerInfo extends Command {
 		eb.addField("Canais de Texto", gd.getTextChannels().size()+"", true);
 		eb.addField("Canais de Voz", gd.getVoiceChannels().size()+"", true);
 
-		if(hook() == null)
-			channel.sendMessageEmbeds(eb.build()).queue();
-		else
-			hook().editOriginalEmbeds(eb.build()).queue();
+		sendMessageEmbeds(channel, eb.build());
 	}	
 }

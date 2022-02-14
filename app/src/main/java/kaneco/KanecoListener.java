@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
 import kaneco.api.Command;
 import kaneco.commands.config.Config;
 import kaneco.commands.moderation.Ban;
@@ -14,6 +16,7 @@ import kaneco.commands.moderation.RemoveWarn;
 import kaneco.commands.moderation.Unmute;
 import kaneco.commands.moderation.Warn;
 import kaneco.commands.moderation.Warns;
+import kaneco.commands.music.Controls;
 import kaneco.commands.music.Disconnect;
 import kaneco.commands.music.LoopQueue;
 import kaneco.commands.music.Move;
@@ -36,6 +39,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -60,6 +64,7 @@ public class KanecoListener extends ListenerAdapter {
 		COMMANDS.put("move", new Move());
 		COMMANDS.put("disconnect", new Disconnect());
 		COMMANDS.put("loop", new LoopQueue());
+		COMMANDS.put("controls", new Controls());
 
 		COMMANDS.put("p", new Play());
 		COMMANDS.put("rm", new Remove());
@@ -80,7 +85,6 @@ public class KanecoListener extends ListenerAdapter {
 		COMMANDS.put("config", new Config());
 	}
 
-
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
 		if(event.isFromGuild()){
@@ -89,9 +93,7 @@ public class KanecoListener extends ListenerAdapter {
 			try{
 				cfg = Kaneco.configCache.get(event.getGuild().getId()); 
 			} catch( ExecutionException e) {
-				System.out.println("OnMessageReceived, not possible to get guild config");
-			//	cfg = new GuildConfig(event.getGuild().getId(), event.getGuild().getOwnerId(), "./");
-			//	Kaneco.configCache.put(event.getGuild().getId(), cfg);
+				System.out.println("onMessageReceived, error on getting guild config.");
 			} 
 
 			if(msg.startsWith(cfg.getGuildPrefix()) && !event.getAuthor().isBot()) {
@@ -148,6 +150,7 @@ public class KanecoListener extends ListenerAdapter {
 			.addOption(OptionType.NUMBER, "nova", "nova posição da música", true).queue();
 		gd.upsertCommand("disconnect", "desconecta o bot do canal de voz e limpa a queue.").queue();
 		gd.upsertCommand("loop", "habilita modo repetição.").queue();
+		gd.upsertCommand("controls", "Exibe controles de música.").queue();
 
 		gd.upsertCommand("warn", "avisa o usuário sobre determinada infração.")
 			.addOption(OptionType.USER, "user", "usuário a tomar warn", true)
@@ -195,6 +198,7 @@ public class KanecoListener extends ListenerAdapter {
 				GuildMusicManager gmm = PlayerManager.getInstance().getGuildMusicManger(event.getGuild());
 				String name = event.getMember().getNickname();
 				String avatar = event.getMember().getEffectiveAvatarUrl();
+				AudioTrack track = gmm.player.getPlayingTrack();
 				switch(event.getButton().getId()){
 					case "next":
 						eb.setFooter("Pulada por: " + name, avatar);
@@ -211,9 +215,20 @@ public class KanecoListener extends ListenerAdapter {
 						gmm.scheduler.setLoopQueue(!gmm.scheduler.isLoopQueue());
 						event.editMessageEmbeds(eb.build()).queue();
 						break;
+					case "+10s":
+						track.setPosition(track.getPosition() + 10000);
+						eb.setFooter(name + " avançou 10s. Posição:" + (track.getPosition() / 1000) / 60 + ":" + (track.getPosition() / 1000) % 60 , avatar);
+						event.editMessageEmbeds(eb.build()).queue();
+						break;
+					case "-10s":
+						track.setPosition(track.getPosition() - 10000);
+						eb.setFooter(name + " voltou 10s. Posição:" + (track.getPosition() / 1000) / 60 + ":" + (track.getPosition() / 1000) % 60 , avatar);
+						event.editMessageEmbeds(eb.build()).queue();
+						break;
 				}
 			}
 		}
+		event.deferEdit().queue();
 	}
 
 	@Override
@@ -293,6 +308,14 @@ public class KanecoListener extends ListenerAdapter {
             GuildMusicManager manager = PlayerManager.getInstance().getGuildMusicManger(event.getGuild());
             manager.scheduler.purgeQueue();
             manager.scheduler.stop();
+		}
+	}
+
+	@Override
+	public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
+		if(!event.getGuild().getAudioManager().isSelfDeafened()){
+			if(event.getMember().equals(event.getGuild().getSelfMember()))
+				event.getMember().deafen(true).queue();
 		}
 	}
 

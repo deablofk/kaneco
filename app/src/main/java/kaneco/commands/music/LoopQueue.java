@@ -24,11 +24,6 @@ public class LoopQueue extends Command {
             builder.setDescription("Repetir queue desativado.\n Limpando Fila Atual...");
         }
 
-		if(hook() == null)
-			channel.sendMessageEmbeds(builder.build()).queue();
-		else
-			hook().editOriginalEmbeds(builder.build()).queue();
-
+		sendMessageEmbeds(channel, builder.build());
 	}
-
 }

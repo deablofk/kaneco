@@ -10,6 +10,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import kaneco.api.Command;
 import kaneco.music.GuildMusicManager;
 import kaneco.music.PlayerManager;
+import kaneco.utils.KanecoUtils;
 import kaneco.data.PagedEmbed;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -38,10 +39,9 @@ public class Queue extends Command{
 
         if(songs.isEmpty()) {
             messages.append("Queue Vazia\n");
-			if(hook() == null)
-				channel.sendMessageEmbeds(new EmbedBuilder().setDescription(messages.toString()).build()).queue();
-			else 
-				hook().editOriginalEmbeds(new EmbedBuilder().setDescription(messages.toString()).build()).queue();
+			sendMessageEmbeds(channel, KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Queue").build());
+
+			sendMessageEmbeds(channel, new EmbedBuilder().setDescription(messages.toString()).build());
         }
         else {
 			List<List<AudioTrack>> smallerSongsList = Lists.partition(songs, 10);
@@ -61,6 +61,7 @@ public class Queue extends Command{
 			comps.add(Button.primary("prevpage", "prev page"));
 			comps.add(Button.primary("nextpage", "next page"));
 			String messageId = null; 
+
 			if(hook() == null) 
 				messageId = channel.sendMessageEmbeds(pagedEmbed.getCurrentPage()).setActionRow(comps).complete().getId();
 			else

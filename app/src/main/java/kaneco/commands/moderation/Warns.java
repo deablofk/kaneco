@@ -5,6 +5,7 @@ import java.util.List;
 import kaneco.Kaneco;
 import kaneco.api.Command;
 import kaneco.data.WarnObject;
+import kaneco.utils.KanecoUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
@@ -16,27 +17,25 @@ public class Warns extends Command {
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		Member member = guild.retrieveMemberById(msgParams[1].replaceAll("[<@!>]", "")).complete();
-		EmbedBuilder embed = new EmbedBuilder();
-		if(member != null) {
-			List<WarnObject> warnList = Kaneco.restApi.getWarns(member.getId());
-			String warnMessage = "";
-			for (int i = 0; i < warnList.size(); i++) {
-				WarnObject warn = warnList.get(i);
-				if(warn.getGuild().equals(guild.getId()))
-					warnMessage += warn.getId() + " - " + warn.getDescription() + "\n";
-			}
+		EmbedBuilder eb = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Warns");
+		if(member == null) {
+			eb.setDescription("Usuário não encontrado");
+			sendMessageEmbeds(channel, eb.build());
+			return;
+		}
 
-			embed.setTitle("Warns | " + member.getUser().getName());
-			embed.setDescription(warnMessage);
+		List<WarnObject> warnList = Kaneco.restApi.getWarns(member.getId());
+		String warnMessage = "";
+		for (int i = 0; i < warnList.size(); i++) {
+			WarnObject warn = warnList.get(i);
+			if(warn.getGuild().equals(guild.getId()))
+				warnMessage += warn.getId() + " - " + warn.getDescription() + "\n";
 		}
-		else {
-			embed.setDescription("Usuário não encontrado");
-		}
+
+		eb.setTitle(member.getUser().getName());
+		eb.setDescription(warnMessage);
 	
-		if(hook() == null)
-			channel.sendMessageEmbeds(embed.build()).queue();
-		else
-			hook().editOriginalEmbeds(embed.build()).queue();
+		sendMessageEmbeds(channel, eb.build());
 	}
 
 	@Override

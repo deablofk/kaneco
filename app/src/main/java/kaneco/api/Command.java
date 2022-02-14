@@ -1,5 +1,6 @@
 package kaneco.api;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import kaneco.Kaneco;
@@ -7,8 +8,11 @@ import kaneco.data.GuildConfig;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 public class Command implements ICommand {
 
@@ -48,6 +52,13 @@ public class Command implements ICommand {
 		}
 
 		return config;
+	}
+
+	public void sendMessageEmbeds(TextChannel channel, MessageEmbed msg){
+		if(hook() == null)
+			channel.sendMessageEmbeds(msg).queue();
+		else 
+			hook().editOriginalEmbeds(msg).queue();
 	}
 
 }

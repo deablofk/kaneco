@@ -20,10 +20,7 @@ public class Avatar extends Command{
 			eb.setImage(au.getEffectiveAvatarUrl() + "?size=1024");
 		}
 
-		if(hook() == null) 
-			ch.sendMessageEmbeds(eb.build()).queue();
-		else 
-			hook().editOriginalEmbeds(eb.build()).queue();
+		sendMessageEmbeds(ch, eb.build());
 	}
 
 }

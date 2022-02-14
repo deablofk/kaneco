@@ -6,7 +6,9 @@ import java.util.Arrays;
 import kaneco.Kaneco;
 import kaneco.api.Command;
 import kaneco.music.PlayerManager;
+import kaneco.utils.KanecoUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -17,82 +19,77 @@ public class Play extends Command {
 	
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
-        if(author.getVoiceState().getChannel() != null) {
-			String trackUrl = String.join(" ", Arrays.copyOfRange(msgParams, 1, msgParams.length));
+		AudioChannel authorChannel = author.getVoiceState().getChannel();
+		AudioChannel botChannel = guild.getSelfMember().getVoiceState().getChannel();
+		
+		if(authorChannel == null) {
+			sendMessageEmbeds(channel, KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Play")
+					.setDescription("É necessário que você esteja em um canal de voz.").build());
+			return;
+		}
+		if(botChannel != null && authorChannel != botChannel){
+			sendMessageEmbeds(channel, KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Play")
+					.setDescription("É necessário que você esteja no mesmo canal do bot.").build());
+			return;
+		}
 
-			if(trackUrl.contains("spotify.com")) {
-				String spot = trackUrl.replace("https://open.spotify.com/", "");
-				String[] linkData = spot.substring(0, spot.indexOf("?si")).split("/");
-			
-				switch(linkData[0]) {
-					case "track":
-						try { 
-							String name = Kaneco.spotifyApi.getTrack(linkData[1]).build().execute().getName();
-							PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" +name, true);
-						} catch (Exception e) {};
-						break;
-					case "playlist":
-						try {
-							PlaylistTrack[] playlistTracks = Kaneco.spotifyApi.getPlaylistsItems(linkData[1]).build().execute().getItems();
+		String trackUrl = String.join(" ", Arrays.copyOfRange(msgParams, 1, msgParams.length));
 
-							EmbedBuilder embed = new EmbedBuilder();
-							embed.setTitle("Playlist carregada.");
-							embed.setDescription("Foram inseridas: " + playlistTracks.length + " músicas na fila.");
-							embed.setTimestamp(OffsetDateTime.now());
+		if(trackUrl.contains("spotify.com")) {
+			String spot = trackUrl.replace("https://open.spotify.com/", "");
+			String[] linkData = spot.substring(0, spot.indexOf("?si")).split("/");
+		
+			switch(linkData[0]) {
+				case "track":
+					try { 
+						String name = Kaneco.spotifyApi.getTrack(linkData[1]).build().execute().getName();
+						PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" +name, true);
+					} catch (Exception e) {};
+					break;
+				case "playlist":
+					try {
+						PlaylistTrack[] playlistTracks = Kaneco.spotifyApi.getPlaylistsItems(linkData[1]).build().execute().getItems();
 
+						EmbedBuilder embed = new EmbedBuilder();
+						embed.setTitle("Playlist carregada.");
+						embed.setDescription("Foram inseridas: " + playlistTracks.length + " músicas na fila.");
+						embed.setTimestamp(OffsetDateTime.now());
 
-							if(hook() == null){
-								channel.sendMessageEmbeds(embed.build()).queue();
-							}
-							else {
-								hook().editOriginalEmbeds(embed.build()).queue();
-							}
+						sendMessageEmbeds(channel, embed.build());
 
-							for(int i = 0; i < playlistTracks.length; i++) {
-								PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + playlistTracks[i].getTrack().getName(), false);
-							}
+						for(int i = 0; i < playlistTracks.length; i++) {
+							PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + playlistTracks[i].getTrack().getName(), false);
 						}
-						catch(Exception e) { e.printStackTrace(); }
-						break;
-					case "album":
-						try {
-							TrackSimplified[] playlistTracks = Kaneco.spotifyApi.getAlbumsTracks(linkData[1]).build().execute().getItems(); 
+					}
+					catch(Exception e) { e.printStackTrace(); }
+					break;
+				case "album":
+					try {
+						TrackSimplified[] playlistTracks = Kaneco.spotifyApi.getAlbumsTracks(linkData[1]).build().execute().getItems(); 
 
-							EmbedBuilder embed = new EmbedBuilder();
-							embed.setTitle("Playlist carregada.");
-							embed.setDescription("Foram inseridas: " + playlistTracks.length + " músicas na fila.");
-							embed.setTimestamp(OffsetDateTime.now());
+						EmbedBuilder embed = new EmbedBuilder();
+						embed.setTitle("Playlist carregada.");
+						embed.setDescription("Foram inseridas: " + playlistTracks.length + " músicas na fila.");
+						embed.setTimestamp(OffsetDateTime.now());
 
-							if(hook() == null){
-								channel.sendMessageEmbeds(embed.build()).queue();
-							}
-							else {
-								hook().editOriginalEmbeds(embed.build()).queue();
-							}
+						sendMessageEmbeds(channel, embed.build());
 
-							for(int i = 0; i < playlistTracks.length; i++) {
-								PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + playlistTracks[i].getArtists()[0].getName() + " "+ playlistTracks[i].getName(), false);
-							}
+						for(int i = 0; i < playlistTracks.length; i++) {
+							PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + playlistTracks[i].getArtists()[0].getName() + " "+ playlistTracks[i].getName(), false);
 						}
-						catch(Exception e) { e.printStackTrace(); }
-						break;
-				}
+					}
+					catch(Exception e) { e.printStackTrace(); }
+					break;
 			}
-			else if(!PlayerManager.isURI(trackUrl)){
-				PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + trackUrl, true);
-			}
-			else {
-				PlayerManager.getInstance().loadAndPlay(hook(), channel, author, trackUrl, true);
-			}
+		}
+		else if(!PlayerManager.isURI(trackUrl)){
+			PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + trackUrl, true);
+		}
+		else {
+			PlayerManager.getInstance().loadAndPlay(hook(), channel, author, trackUrl, true);
+		}
 
-            PlayerManager.getInstance().getGuildMusicManger(channel.getGuild()).scheduler.setTextChannel(channel);
-        }
-        else {
-			if(hook() == null)
-				channel.sendMessageEmbeds(new EmbedBuilder().setDescription("É necessário que você esteja em um canal de voz.").build()).queue();
-			else
-				hook().editOriginalEmbeds(new EmbedBuilder().setDescription("É necessário que você esteja em um canal de voz.").build()).queue();
-        }
+		PlayerManager.getInstance().getGuildMusicManger(channel.getGuild()).scheduler.setTextChannel(channel);
 	}
 	
 	@Override

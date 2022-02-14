@@ -23,7 +23,7 @@ public class Mute extends Command {
 		GuildConfig config = config(guild);
 
 		if ( time > 0 ){
-			memberMute.timeoutFor(time, unit).queue();
+			guild.timeoutFor(memberMute, time, unit).queue();
 			embed.setDescription("Usuario " + memberMute.getAsMention() + " mutado por **" + time + " " + unit.name() + "**");
 			if(hook() == null)
 				channel.sendMessageEmbeds(embed.build()).queue();
