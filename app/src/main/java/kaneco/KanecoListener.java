@@ -143,7 +143,8 @@ public class KanecoListener extends ListenerAdapter {
 		gd.upsertCommand("queue", "mostra a fila de músicas.").queue();
 		gd.upsertCommand("remove", "remove uma música da fila.")
 			.addOption(OptionType.NUMBER, "posição", "número onde a música se encontra na fila.", true).queue();
-		gd.upsertCommand("skip", "pula para a próxima música.").queue();
+		gd.upsertCommand("skip", "pula para a próxima música.")
+			.addOption(OptionType.NUMBER, "quantia", "Quantidade de músicas a ser pulada.").queue();
 		gd.upsertCommand("np", "mostra o tempo da música atual.").queue();
 		gd.upsertCommand("move", "move uma música de posição.")
 			.addOption(OptionType.NUMBER, "antiga", "posição atual da música", true)

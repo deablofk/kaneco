@@ -50,6 +50,7 @@ public class Queue extends Command{
 				List<AudioTrack> currentList = smallerSongsList.get(i);
 				StringBuilder smallList = new StringBuilder();
 				smallList.append(messages.toString());
+				smallList.append("Total de músicas: " + songs.size() + "\n\n");
 				smallList.append("Posição - Link\n\n");
 				for( int j = 0; j < currentList.size(); j++ ) {
 					smallList.append(counter + " - [" + currentList.get(j).getInfo().title +"](" + currentList.get(j).getInfo().uri + ")\n");
