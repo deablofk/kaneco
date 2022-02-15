@@ -1,7 +1,9 @@
 package kaneco.commands.music;
 
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import kaneco.Kaneco;
 import kaneco.api.Command;
@@ -13,6 +15,7 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
+import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.model_objects.specification.TrackSimplified;
 
 public class Play extends Command {
@@ -42,8 +45,9 @@ public class Play extends Command {
 			switch (linkData[0]) {
 				case "track":
 					try {
-						String name = Kaneco.spotifyApi.getTrack(linkData[1]).build().execute().getName();
-						PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + name, true);
+						Track track = Kaneco.spotifyApi.getTrack(linkData[1]).build().execute();
+						PlayerManager.getInstance().loadAndPlay(hook(), channel, author,
+								"ytsearch:" + track.getArtists()[0].getName() + track.getName(), true);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -53,16 +57,23 @@ public class Play extends Command {
 						PlaylistTrack[] playlistTracks = Kaneco.spotifyApi.getPlaylistsItems(linkData[1]).build()
 								.execute().getItems();
 
+						String[] ids = new String[playlistTracks.length];
+						for (int i = 0; i < playlistTracks.length; i++) {
+							ids[i] = playlistTracks[i].getTrack().getId();
+						}
+						Track[] tracks = Kaneco.spotifyApi.getSeveralTracks(ids).build().execute();
+
 						EmbedBuilder embed = new EmbedBuilder();
 						embed.setTitle("Playlist carregada.");
-						embed.setDescription("Foram inseridas: " + playlistTracks.length + " músicas na fila.");
+						embed.setDescription("Foram inseridas: " + tracks.length + " músicas na fila.");
 						embed.setTimestamp(OffsetDateTime.now());
 
 						sendMessageEmbeds(channel, embed.build());
 
-						for (int i = 0; i < playlistTracks.length; i++) {
+						for (int i = 0; i < tracks.length; i++) {
 							PlayerManager.getInstance().loadAndPlay(hook(), channel, author,
-									"ytsearch:" + playlistTracks[i].getTrack().getName(), false);
+									"ytsearch:" + tracks[i].getArtists()[0].getName() + " " + tracks[i].getName(),
+									false);
 						}
 					} catch (Exception e) {
 						e.printStackTrace();

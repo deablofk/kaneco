@@ -168,7 +168,7 @@ public class Config extends Command {
 			}
 
 			if (updated) {
-				Kaneco.restApi.sendGuildConfig(cfg);
+				Kaneco.restApi.putGuildConfig(cfg);
 				Kaneco.configCache.refresh(guild.getId());
 			}
 		} else {
@@ -199,8 +199,12 @@ public class Config extends Command {
 			builder.append("\n<:black_arrow_right:940445321652215829> **Cargos de Alerta:**\n" + rolesInLine);
 
 			eb.setTitle("Configurações Atuais");
-			eb.setThumbnail(guild.getIconUrl());
-			eb.setImage(guild.getBannerUrl() + "?size=1024");
+			if (guild.getIconUrl() != null) {
+				eb.setThumbnail(guild.getIconUrl());
+			}
+			if (guild.getBannerUrl() != null) {
+				eb.setImage(guild.getBannerUrl() + "?size=1024");
+			}
 			String desc = builder.toString().replace("<@&null>", "Nenhum").replace("<#null>", "Nenhum").replace("null",
 					"Nenhum");
 			eb.setDescription(desc);

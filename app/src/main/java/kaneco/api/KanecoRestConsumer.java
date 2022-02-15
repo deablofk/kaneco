@@ -11,8 +11,10 @@ import com.google.gson.JsonParser;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -25,7 +27,7 @@ import kaneco.data.WarnObject;
 
 public class KanecoRestConsumer {
 
-	private String baseURL = "http://localhost:5000/api/v1";
+	private String baseURL = "http://localhost:8000/api/v2";
 	private Gson gson = new Gson();
 	private String accessToken;
 
@@ -47,7 +49,7 @@ public class KanecoRestConsumer {
 	}
 
 	public boolean sendUserData(UserData data) {
-		HttpResponse hr = getApiResponse(baseURL + "/users/" + data.getUser(), "POST", accessToken,
+		HttpResponse hr = getApiResponse(baseURL + "/users/", "POST", accessToken,
 				new StringEntity(gson.toJson(data), ContentType.APPLICATION_JSON));
 		int statusCode = hr.getStatusLine().getStatusCode();
 		return statusCode == 200 ? true : false;
@@ -65,26 +67,32 @@ public class KanecoRestConsumer {
 			} catch (IOException e) {
 				System.out.println("KanecoRestConsumer.java, error on getting guild config from api.");
 			}
-			return gson.fromJson(JsonParser.parseString(json).getAsJsonObject().get("data").getAsString(),
-					GuildConfig.class);
-		} else if (statusCode == 400) {
+			return gson.fromJson(json, GuildConfig.class);
+		} else if (statusCode == 404) {
 			GuildConfig cfg = new GuildConfig(guildId, null, "./");
-			sendGuildConfig(cfg);
+			postGuildConfig(cfg);
 			return cfg;
 		}
 
 		return null;
 	}
 
-	public boolean sendGuildConfig(GuildConfig cfg) {
-		HttpResponse hr = getApiResponse(baseURL + "/guilds/" + cfg.getGuildId(), "POST", accessToken,
+	public boolean postGuildConfig(GuildConfig cfg) {
+		HttpResponse hr = getApiResponse(baseURL + "/guilds/", "POST", accessToken,
+				new StringEntity(gson.toJson(cfg), ContentType.APPLICATION_JSON));
+		int statusCode = hr.getStatusLine().getStatusCode();
+		return statusCode == 200 ? true : false;
+	}
+
+	public boolean putGuildConfig(GuildConfig cfg) {
+		HttpResponse hr = getApiResponse(baseURL + "/guilds/" + cfg.getGuildId(), "PUT", accessToken,
 				new StringEntity(gson.toJson(cfg), ContentType.APPLICATION_JSON));
 		int statusCode = hr.getStatusLine().getStatusCode();
 		return statusCode == 200 ? true : false;
 	}
 
 	public List<WarnObject> getWarns(String userId) {
-		HttpResponse hr = getApiResponse(baseURL + "/users/" + userId + "/warn", "GET", accessToken, null);
+		HttpResponse hr = getApiResponse(baseURL + "/users/warn/" + userId, "GET", accessToken, null);
 		String json = null;
 
 		try {
@@ -93,32 +101,38 @@ public class KanecoRestConsumer {
 			e.printStackTrace();
 		}
 
-		if (json.contains("failed")) {
+		if (hr.getStatusLine().getStatusCode() == 404 || hr.getStatusLine().getStatusCode() == 400) {
 			return new ArrayList<WarnObject>();
 		}
 
-		JsonArray jsonArray = JsonParser.parseString(json).getAsJsonObject().get("data").getAsJsonArray();
-
-		return gson.fromJson(jsonArray, new TypeToken<List<WarnObject>>() {
+		return gson.fromJson(json, new TypeToken<List<WarnObject>>() {
 		}.getType());
 	}
 
 	public boolean deleteWarn(String userId, String warnId) {
-		HttpResponse hr = getApiResponse(baseURL + "/users/" + userId + "/warn/" + warnId + "/delete", "POST",
+		HttpResponse hr = getApiResponse(baseURL + "/users/warn/" + userId + "/" + warnId, "DELETE",
 				accessToken, null);
 		int statusCode = hr.getStatusLine().getStatusCode();
 		return statusCode == 200 ? true : false;
 	}
 
-	public boolean sendWarn(WarnObject warn) {
-		HttpResponse hr = getApiResponse(baseURL + "/users/" + warn.getUser() + "/warn", "POST", accessToken,
-				new StringEntity(gson.toJson(warn), ContentType.APPLICATION_JSON));
+	public boolean sendWarn(String userid, WarnObject warn) {
+		String json = gson.toJson(warn);
+		HttpResponse hr = getApiResponse(baseURL + "/users/warn", "POST", accessToken,
+				new StringEntity(json, ContentType.APPLICATION_JSON));
+
+		if (hr.getStatusLine().getStatusCode() == 400) {
+			sendUserData(new UserData(userid));
+			hr = getApiResponse(baseURL + "/users/warn", "POST", accessToken,
+					new StringEntity(json, ContentType.APPLICATION_JSON));
+		}
+
 		int statusCode = hr.getStatusLine().getStatusCode();
 		return statusCode == 200 ? true : false;
 	}
 
 	private String getAccessToken(String authToken) {
-		HttpResponse hr = getApiResponse(baseURL + "/auth/token/access_token", "POST", authToken, null);
+		HttpResponse hr = getApiResponse(baseURL + "/auth/access_token", "POST", authToken, null);
 		String json = null;
 
 		try {
@@ -134,11 +148,29 @@ public class KanecoRestConsumer {
 
 	public HttpResponse getApiResponse(String url, String type, String authorizationValue, StringEntity entity) {
 		HttpClient client = HttpClientBuilder.create().build();
-		HttpUriRequest request = type == "POST" ? new HttpPost(url) : new HttpGet(url);
-		request.addHeader("Authorization", authorizationValue);
+		HttpUriRequest request = null;
+		switch (type) {
+			case "POST":
+				request = new HttpPost(url);
+				if (entity != null) {
+					((HttpPost) request).setEntity(entity);
+				}
+				break;
+			case "GET":
+				request = new HttpGet(url);
+				break;
+			case "PUT":
+				request = new HttpPut(url);
+				if (entity != null) {
+					((HttpPut) request).setEntity(entity);
+				}
+				break;
+			case "DELETE":
+				request = new HttpDelete(url);
+				break;
+		}
 
-		if (entity != null && type == "POST")
-			((HttpPost) request).setEntity(entity);
+		request.addHeader("Authorization", "Bearer " + authorizationValue);
 
 		try {
 			return client.execute(request);

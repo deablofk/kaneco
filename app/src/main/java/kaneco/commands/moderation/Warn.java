@@ -34,7 +34,7 @@ public class Warn extends Command {
 		eb.addField("Motivo:", reason, false);
 
 		WarnObject obj = new WarnObject(member.getId(), guild.getId(), author.getId(), reason, null);
-		Kaneco.restApi.sendWarn(obj);
+		Kaneco.restApi.sendWarn(member.getId(), obj);
 		member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb.build()).queue();
 
 		GuildConfig cfg = config(guild);

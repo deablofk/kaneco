@@ -33,6 +33,8 @@ public class Unmute extends Command {
 		if (cfg.getMuteRole() != null && guild.getRoleById(cfg.getMuteRole()) != null) {
 			guild.removeRoleFromMember(member, guild.getRoleById(cfg.getMuteRole())).queue();
 		}
+
+		sendMessageEmbeds(channel, embed.build());
 	}
 
 	@Override

@@ -37,7 +37,7 @@ public class GuildConfig {
 	}
 
 	public boolean addBlackListChannel(TextChannel txtChannel) {
-		if (!blackListChannles.contains(txtChannel)){
+		if (!blackListChannles.contains(txtChannel)) {
 			blackListChannles.add(txtChannel);
 			return true;
 		}
@@ -45,7 +45,7 @@ public class GuildConfig {
 		return false;
 	}
 
-	public String getGuildPrefix(){
+	public String getGuildPrefix() {
 		return prefix;
 	}
 
@@ -55,8 +55,8 @@ public class GuildConfig {
 
 	public String getWelcomeMessage() {
 		return welcomeMessage;
-	} 
-	
+	}
+
 	public void setWelcomeMessage(String welcomeMessage) {
 		this.welcomeMessage = welcomeMessage;
 	}
@@ -69,7 +69,7 @@ public class GuildConfig {
 		this.welcomeChannel = welcomeChannel;
 	}
 
-	public String getWelcomeRole(){
+	public String getWelcomeRole() {
 		return welcomeRole;
 	}
 
@@ -85,7 +85,7 @@ public class GuildConfig {
 		this.muteRole = muteRole;
 	}
 
-	public String getBanChannel(){
+	public String getBanChannel() {
 		return banChannel;
 	}
 
@@ -101,4 +101,3 @@ public class GuildConfig {
 		this.alertRoles = alertRoles;
 	}
 }
-
