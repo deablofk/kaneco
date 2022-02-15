@@ -12,7 +12,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 public class NP extends Command {
-	
+
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		GuildMusicManager manager = PlayerManager.getInstance().getGuildMusicManger(guild);
@@ -20,20 +20,21 @@ public class NP extends Command {
 		EmbedBuilder embed = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " NP");
 		embed.setTitle("Musíca Atual");
 
-		if( track == null ) {
+		if (track == null) {
 			sendMessageEmbeds(channel, embed.setDescription("O bot não está tocando nenhuma música.").build());
 			return;
 		}
 
 		long pos = track.getPosition() / 1000;
 		long dur = track.getDuration() / 1000;
-		int stage = (int)((pos * 30) / dur);
+		int stage = (int) ((pos * 30) / dur);
 
 		StringBuilder builder = new StringBuilder();
 		builder.append("──────────────────────────────");
 		builder.insert(stage, "▶");
-		String progressBar = pos/60 +":"+ pos%60 + builder.toString() + dur/60 +":"+ dur%60;
+		String progressBar = pos / 60 + ":" + pos % 60 + builder.toString() + dur / 60 + ":" + dur % 60;
 
-		sendMessageEmbeds(channel, embed.setDescription("Tocando atualmente: ["+track.getInfo().title+")\n" +progressBar).build());
+		sendMessageEmbeds(channel,
+				embed.setDescription("Tocando atualmente: [" + track.getInfo().title + ")\n" + progressBar).build());
 	}
 }

@@ -23,21 +23,20 @@ public class PagedEmbed {
 		pages.get(pageIndex);
 	}
 
-	public MessageEmbed getCurrentPage(){
+	public MessageEmbed getCurrentPage() {
 		return pages.get(currentPage);
 	}
 
-	public MessageEmbed nextPage(){
-		if (currentPage < pages.size() - 1) 
+	public MessageEmbed nextPage() {
+		if (currentPage < pages.size() - 1)
 			currentPage += 1;
 		return getCurrentPage();
 	}
 
-	public MessageEmbed prevPage(){
+	public MessageEmbed prevPage() {
 		if (currentPage > 0)
 			currentPage -= 1;
 
 		return getCurrentPage();
 	}
 }
-

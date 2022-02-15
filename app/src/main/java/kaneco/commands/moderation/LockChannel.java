@@ -13,50 +13,44 @@ import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class LockChannel extends Command{
-	
+public class LockChannel extends Command {
+
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		EmbedBuilder embed = new EmbedBuilder();
 		Role everyioneRole = guild.getPublicRole();
-
 		TextChannel lockChannel = channel;
 
-		if(msgParams.length > 1) {
+		if (msgParams.length > 1) {
 			lockChannel = guild.getTextChannelById(msgParams[1].replaceAll("[<#>]", ""));
 		}
 
-		if(lockChannel != null) {
-			IPermissionContainer container = lockChannel.getPermissionContainer();
-			PermissionOverride po = lockChannel.getPermissionOverride(everyioneRole);
-
-			List<Permission> perms = new ArrayList<>();
-			if(po != null && po.getDenied().contains(Permission.MESSAGE_SEND)){
-
-				if(po.getDenied().contains(Permission.VIEW_CHANNEL)){
-					perms.add(Permission.VIEW_CHANNEL);
-				}
-
-				container.putPermissionOverride(everyioneRole).setAllow(Permission.MESSAGE_SEND).setDeny(perms).queue();
-				embed.setDescription("Canal " + lockChannel.getAsMention() + " desbloqueado.");
-			}
-			else {
-				perms.add(Permission.MESSAGE_SEND);
-				if(po.getDenied().contains(Permission.VIEW_CHANNEL)){
-					perms.add(Permission.VIEW_CHANNEL);
-				}
-				container.upsertPermissionOverride(everyioneRole).setDeny(perms).queue();
-				embed.setDescription("Canal " + lockChannel.getAsMention() + " bloqueado.");
-			}
-		}
-		else {
-			embed.setDescription("Canal não encontrado.");
+		if (lockChannel == null) {
+			sendMessageEmbeds(channel, embed.setDescription("Canal não encontrado").build());
+			return;
 		}
 
-		if(hook() == null)
-			channel.sendMessageEmbeds(embed.build()).queue();
-		else
-			hook().editOriginalEmbeds(embed.build()).queue();
+		IPermissionContainer container = lockChannel.getPermissionContainer();
+		PermissionOverride po = lockChannel.getPermissionOverride(everyioneRole);
+
+		List<Permission> perms = new ArrayList<>();
+		if (po != null && po.getDenied().contains(Permission.MESSAGE_SEND)) {
+			if (po.getDenied().contains(Permission.VIEW_CHANNEL)) {
+				perms.add(Permission.VIEW_CHANNEL);
+			}
+
+			container.putPermissionOverride(everyioneRole).setAllow(Permission.MESSAGE_SEND).setDeny(perms).queue();
+			embed.setDescription("Canal " + lockChannel.getAsMention() + " desbloqueado.");
+		} else {
+			perms.add(Permission.MESSAGE_SEND);
+			if (po.getDenied().contains(Permission.VIEW_CHANNEL)) {
+				perms.add(Permission.VIEW_CHANNEL);
+			}
+			container.upsertPermissionOverride(everyioneRole).setDeny(perms).queue();
+			embed.setDescription("Canal " + lockChannel.getAsMention() + " bloqueado.");
+		}
+
+		sendMessageEmbeds(channel, embed.build());
 	}
 
 	@Override

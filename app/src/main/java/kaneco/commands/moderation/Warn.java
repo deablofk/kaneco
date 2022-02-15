@@ -16,14 +16,14 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class Warn extends Command{
+public class Warn extends Command {
 
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		Member member = guild.retrieveMemberById(msgParams[1].replaceAll("[<@!>]", "")).complete();
-		EmbedBuilder eb = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Warn"); 
+		EmbedBuilder eb = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Warn");
 
-		if(member == null) {
+		if (member == null) {
 			sendMessageEmbeds(channel, eb.setDescription("Usuário não encontrado.").build());
 			return;
 		}
@@ -38,31 +38,31 @@ public class Warn extends Command{
 		member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb.build()).queue();
 
 		GuildConfig cfg = config(guild);
-		if(!cfg.getAlertRoles().isEmpty()){
+		if (!cfg.getAlertRoles().isEmpty()) {
 			List<Role> memberRoles = member.getRoles();
 			List<String> alertRolesId = cfg.getAlertRoles();
 
 			int warnRoles = 0;
 
-			for(int i = 0; i < memberRoles.size(); i++) {
-				for(int j = 0; j < alertRolesId.size(); j++) {
-					if(memberRoles.get(i).getId().equals(alertRolesId.get(j))) {
+			for (int i = 0; i < memberRoles.size(); i++) {
+				for (int j = 0; j < alertRolesId.size(); j++) {
+					if (memberRoles.get(i).getId().equals(alertRolesId.get(j))) {
 						warnRoles++;
 					}
 				}
 			}
-			
-			if( warnRoles != 3){
+
+			if (warnRoles != 3) {
 				Role warnRole = guild.getRoleById(alertRolesId.get(warnRoles));
-				if(warnRole != null){
+				if (warnRole != null) {
 					guild.addRoleToMember(member, warnRole).queue();
 				}
 			}
 		}
 
-		if(hook() == null)
+		if (hook() == null)
 			channel.sendMessageEmbeds(eb.build()).complete().delete().queueAfter(10, TimeUnit.SECONDS);
-		else 
+		else
 			hook().editOriginalEmbeds(eb.build()).complete().delete().queueAfter(10, TimeUnit.SECONDS);
 	}
 

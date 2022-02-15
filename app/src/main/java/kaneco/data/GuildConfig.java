@@ -1,7 +1,6 @@
 package kaneco.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.TextChannel;

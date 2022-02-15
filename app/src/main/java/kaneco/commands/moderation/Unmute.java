@@ -15,28 +15,24 @@ public class Unmute extends Command {
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		EmbedBuilder embed = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Unmute");
 		Member member = guild.retrieveMemberById(msgParams[1].replace("[<@!>]", "")).complete();
-
-		if(member != null) {
-			if(member.isTimedOut()){
-				GuildConfig cfg = config(guild);
-				member.removeTimeout().queue();
-				if(cfg.getMuteRole() != null && guild.getRoleById(cfg.getMuteRole()) != null){
-					guild.removeRoleFromMember(member, guild.getRoleById(cfg.getMuteRole())).queue();
-				}
-				embed.setDescription("Usuário " + member.getAsMention() + " foi desmutado.");
-			}
-			else{
-				embed.setDescription("Usuário " + member.getAsMention() + " não estava mutado.");
-			}
-		}
-		else {
-			embed.setDescription("Membro não encontrado.");
+		if (member == null) {
+			sendMessageEmbeds(channel, embed.setDescription("Membro não encontrado.").build());
+			return;
 		}
 
-		if(hook() == null) 
-			channel.sendMessageEmbeds(embed.build()).queue();
-		else
-			hook().editOriginalEmbeds(embed.build()).queue();
+		if (!member.isTimedOut()) {
+			sendMessageEmbeds(channel,
+					embed.setDescription("Usuário " + member.getAsMention() + " não estava mutado.").build());
+			return;
+		}
+
+		member.removeTimeout().queue();
+		embed.setDescription("Usuário " + member.getAsMention() + " foi desmutado.");
+
+		GuildConfig cfg = config(guild);
+		if (cfg.getMuteRole() != null && guild.getRoleById(cfg.getMuteRole()) != null) {
+			guild.removeRoleFromMember(member, guild.getRoleById(cfg.getMuteRole())).queue();
+		}
 	}
 
 	@Override

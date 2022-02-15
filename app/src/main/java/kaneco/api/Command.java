@@ -1,6 +1,5 @@
 package kaneco.api;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import kaneco.Kaneco;
@@ -11,8 +10,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.components.ItemComponent;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
 
 public class Command implements ICommand {
 
@@ -24,7 +21,7 @@ public class Command implements ICommand {
 
 	@Override
 	public int params() {
-		return 0;	
+		return 0;
 	}
 
 	@Override
@@ -33,19 +30,19 @@ public class Command implements ICommand {
 	}
 
 	public void setHook(InteractionHook hook) {
-		this.hook = hook;	
+		this.hook = hook;
 	}
 
-	public InteractionHook hook(){
+	public InteractionHook hook() {
 		return hook;
 	}
 
-	public GuildConfig config(Guild guild){
+	public GuildConfig config(Guild guild) {
 		GuildConfig config = null;
 
 		try {
 			config = Kaneco.configCache.get(guild.getId());
-		} catch(ExecutionException e ){
+		} catch (ExecutionException e) {
 			System.out.println("Not possible to get GuildConfig");
 			config = new GuildConfig(guild.getId(), guild.getOwnerId(), "./");
 			Kaneco.configCache.put(guild.getId(), config);
@@ -54,10 +51,10 @@ public class Command implements ICommand {
 		return config;
 	}
 
-	public void sendMessageEmbeds(TextChannel channel, MessageEmbed msg){
-		if(hook() == null)
+	public void sendMessageEmbeds(TextChannel channel, MessageEmbed msg) {
+		if (hook() == null)
 			channel.sendMessageEmbeds(msg).queue();
-		else 
+		else
 			hook().editOriginalEmbeds(msg).queue();
 	}
 

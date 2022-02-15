@@ -11,13 +11,13 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class Ban extends Command{
+public class Ban extends Command {
 
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		Member memberBan = guild.retrieveMemberById(msgParams[1].replaceAll("[<@!>]", "")).complete();
 		EmbedBuilder eb = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Ban");
-		if(memberBan == null){
+		if (memberBan == null) {
 			sendMessageEmbeds(channel, eb.setDescription("Usuário não encontrado.").build());
 			return;
 		}
@@ -32,13 +32,13 @@ public class Ban extends Command{
 		memberBan.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb.build()).queue();
 
 		GuildConfig cfg = config(guild);
-		
-		if(cfg == null)
+
+		if (cfg == null)
 			return;
 
 		TextChannel banChannel = guild.getTextChannelById(cfg.getBanChannel());
 
-		if(banChannel == null)
+		if (banChannel == null)
 			return;
 
 		banChannel.sendMessageEmbeds(eb.build()).queue();
@@ -54,4 +54,3 @@ public class Ban extends Command{
 		return Permission.BAN_MEMBERS;
 	}
 }
-

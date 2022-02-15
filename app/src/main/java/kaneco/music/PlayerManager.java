@@ -16,51 +16,50 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 
 public class PlayerManager {
 
-    private static PlayerManager INSTANCE;
-    private final AudioPlayerManager playerManager;
-    private final Map<Long, GuildMusicManager> musicManagers;
+	private static PlayerManager INSTANCE;
+	private final AudioPlayerManager playerManager;
+	private final Map<Long, GuildMusicManager> musicManagers;
 
-    public PlayerManager() {
-        this.musicManagers = new HashMap<>();
-        this.playerManager = new DefaultAudioPlayerManager();
-        AudioSourceManagers.registerRemoteSources(playerManager);
-        AudioSourceManagers.registerLocalSource(playerManager);
-    }
+	public PlayerManager() {
+		this.musicManagers = new HashMap<>();
+		this.playerManager = new DefaultAudioPlayerManager();
+		AudioSourceManagers.registerRemoteSources(playerManager);
+		AudioSourceManagers.registerLocalSource(playerManager);
+	}
 
-    public GuildMusicManager getGuildMusicManger(Guild guild) {
-        GuildMusicManager musicManager = musicManagers.get(guild.getIdLong());
-        if(musicManager == null) {
-            musicManager = new GuildMusicManager(playerManager);
-            musicManagers.put(guild.getIdLong(), musicManager);
-        }
+	public GuildMusicManager getGuildMusicManger(Guild guild) {
+		GuildMusicManager musicManager = musicManagers.get(guild.getIdLong());
+		if (musicManager == null) {
+			musicManager = new GuildMusicManager(playerManager);
+			musicManagers.put(guild.getIdLong(), musicManager);
+		}
 
-        guild.getAudioManager().setSendingHandler(musicManager.getSendHandler());
-        return musicManager;
-    }
+		guild.getAudioManager().setSendingHandler(musicManager.getSendHandler());
+		return musicManager;
+	}
 
+	public void loadAndPlay(InteractionHook hook, TextChannel channel, Member member, String trackUrl,
+			boolean sendMessage) {
+		KanecoALRH alrh = new KanecoALRH(trackUrl, hook, channel, member, getGuildMusicManger(channel.getGuild()),
+				sendMessage);
+		playerManager.loadItemOrdered(getGuildMusicManger(channel.getGuild()), trackUrl, alrh);
+	}
 
-    public void loadAndPlay(InteractionHook hook, TextChannel channel, Member member, String trackUrl, boolean sendMessage) {
-		KanecoALRH alrh = new KanecoALRH(trackUrl, hook, channel, member, getGuildMusicManger(channel.getGuild()), sendMessage);
-        playerManager.loadItemOrdered(getGuildMusicManger(channel.getGuild()), trackUrl, alrh);
-    }
+	public static boolean isURI(String url) {
+		try {
+			new URI(url);
+			return true;
+		} catch (URISyntaxException e) {
+			return false;
+		}
+	}
 
-    public static boolean isURI(String url) {
-        try{
-            new URI(url);
-            return true;
-        }
-        catch (URISyntaxException e) {
-            return false;
-        }
-    }
+	public static PlayerManager getInstance() {
+		if (INSTANCE == null) {
+			INSTANCE = new PlayerManager();
+		}
 
-    public static PlayerManager getInstance() {
-        if( INSTANCE == null ) {
-            INSTANCE = new PlayerManager();
-        }
-
-        return INSTANCE;
-    }
+		return INSTANCE;
+	}
 
 }
-

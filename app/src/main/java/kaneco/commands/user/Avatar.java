@@ -7,16 +7,15 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class Avatar extends Command{
+public class Avatar extends Command {
 
 	@Override
 	public void runCommand(Member au, TextChannel ch, Guild gd, String[] msgParams) {
 		EmbedBuilder eb = KanecoUtils.defaultCmdEmbed(au, gd.getSelfMember(), " Avatar");
-		if(msgParams.length > 1) {
+		if (msgParams.length > 1) {
 			Member member = gd.retrieveMemberById(msgParams[1].replaceAll("[<@!>]", "")).complete();
 			eb.setImage(member.getEffectiveAvatarUrl() + "?size=1024");
-		}
-		else {
+		} else {
 			eb.setImage(au.getEffectiveAvatarUrl() + "?size=1024");
 		}
 

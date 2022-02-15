@@ -13,16 +13,15 @@ public class LoopQueue extends Command {
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		TrackScheduler scheduler = PlayerManager.getInstance().getGuildMusicManger(guild).scheduler;
-        scheduler.setLoopQueue(!scheduler.isLoopQueue());
-        EmbedBuilder builder = new EmbedBuilder();
+		scheduler.setLoopQueue(!scheduler.isLoopQueue());
+		EmbedBuilder builder = new EmbedBuilder();
 
-        if(scheduler.isLoopQueue()) {
-            builder.setDescription("Repetir queue ativado.");
-        }
-        else {
-            scheduler.getQueue().clear();
-            builder.setDescription("Repetir queue desativado.\n Limpando Fila Atual...");
-        }
+		if (scheduler.isLoopQueue()) {
+			builder.setDescription("Repetir queue ativado.");
+		} else {
+			scheduler.getQueue().clear();
+			builder.setDescription("Repetir queue desativado.\n Limpando Fila Atual...");
+		}
 
 		sendMessageEmbeds(channel, builder.build());
 	}

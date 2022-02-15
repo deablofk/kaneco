@@ -10,26 +10,27 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 
-public class Disconnect extends Command{
+public class Disconnect extends Command {
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		AudioChannel botChannel = guild.getSelfMember().getVoiceState().getChannel();
 		AudioChannel authorChannel = author.getVoiceState().getChannel();
 		EmbedBuilder eb = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Disconnect");
 
-		if(authorChannel == null) {
+		if (authorChannel == null) {
 			sendMessageEmbeds(channel, eb.setDescription("É necessário que você esteja em um canal de voz.").build());
 			return;
 		}
-		if(botChannel != null && botChannel != authorChannel){
-			sendMessageEmbeds(channel, eb.setDescription("É necessário que você esteja no mesmo canal do bot.").build());
+		if (botChannel != null && botChannel != authorChannel) {
+			sendMessageEmbeds(channel,
+					eb.setDescription("É necessário que você esteja no mesmo canal do bot.").build());
 			return;
 		}
-		
+
 		GuildMusicManager manager = PlayerManager.getInstance().getGuildMusicManger(guild);
 		manager.scheduler.purgeQueue();
 		manager.scheduler.stop();
 		guild.getAudioManager().closeAudioConnection();
 		sendMessageEmbeds(channel, eb.setDescription("Até a próxima.").build());
-    }
+	}
 }

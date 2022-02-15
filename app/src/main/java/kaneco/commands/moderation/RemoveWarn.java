@@ -15,23 +15,20 @@ public class RemoveWarn extends Command {
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		EmbedBuilder embed = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Remove Warn");
 		Member member = guild.retrieveMemberById(msgParams[1].replaceAll("[<@!>]", "")).complete();
-		if(member != null) {
-			boolean delete = Kaneco.restApi.deleteWarn(member.getId(), msgParams[2]);
-			if(delete) {
-				embed.setDescription("Warn deletada");
-			}
-			else{ 
-				embed.setDescription("Warn não foi deletada.");
-			}
-		}
-		else {
-			embed.setDescription("Usuário não encontrado.");
+		if (member == null) {
+			sendMessageEmbeds(channel, embed.setDescription("Usuário não encontrado.").build());
+			return;
 		}
 
-		if(hook() == null)
-			channel.sendMessageEmbeds(embed.build()).queue();
-		else
-			hook().editOriginalEmbeds(embed.build()).queue();
+		boolean delete = Kaneco.restApi.deleteWarn(member.getId(), msgParams[2]);
+
+		if (delete) {
+			embed.setDescription("Warn deletada");
+		} else {
+			embed.setDescription("Warn não foi deletada.");
+		}
+
+		sendMessageEmbeds(channel, embed.build());
 	}
 
 	@Override

@@ -19,23 +19,22 @@ public class Clear extends Command {
 		int deleteCount = 0;
 		try {
 			deleteCount = Integer.parseInt(msgParams[1]);
-		}
-		catch(NumberFormatException e){
+		} catch (NumberFormatException e) {
 			embed.setDescription("não foi possível parsear string to int");
 		}
 
 		if (deleteCount > 0 && deleteCount < 101) {
 			List<Message> messages = channel.getHistory().retrievePast(deleteCount).complete();
-			if(!messages.isEmpty()) {
+			if (!messages.isEmpty()) {
 				channel.purgeMessages(messages);
 			}
 			embed.setDescription("Foram deletas **" + deleteCount + "** mensagens.");
-		}
-		else {
-			embed.setDescription("É necessário que o total de mensagens seja um valor **maior que 0 e menor que 100**.");
+		} else {
+			embed.setDescription(
+					"É necessário que o total de mensagens seja um valor **maior que 0 e menor que 100**.");
 		}
 
-		if(hook() == null)
+		if (hook() == null)
 			channel.sendMessageEmbeds(embed.build()).complete().delete().queueAfter(10, TimeUnit.SECONDS);
 		else
 			hook().editOriginalEmbeds(embed.build()).complete().delete().queueAfter(10, TimeUnit.SECONDS);
@@ -51,4 +50,3 @@ public class Clear extends Command {
 		return Permission.MESSAGE_MANAGE;
 	}
 }
-

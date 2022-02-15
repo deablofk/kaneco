@@ -22,32 +22,28 @@ public class Mute extends Command {
 		long time = Long.parseLong(msgParams[2].replaceAll("[^\\d]", ""));
 		GuildConfig config = config(guild);
 
-		if ( time > 0 ){
-			guild.timeoutFor(memberMute, time, unit).queue();
-			embed.setDescription("Usuario " + memberMute.getAsMention() + " mutado por **" + time + " " + unit.name() + "**");
-			if(hook() == null)
-				channel.sendMessageEmbeds(embed.build()).queue();
-			else
-				hook().editOriginalEmbeds(embed.build()).queue();
-
-			if(config.getMuteRole() != null) {
-				Role muteRole = guild.getRoleById(config.getMuteRole());
-				if(muteRole != null) {
-					guild.addRoleToMember(memberMute, muteRole).queue();
-					guild.removeRoleFromMember(memberMute, muteRole).queueAfter(time, unit);
-				}
-			}
+		if (time == 0) {
+			sendMessageEmbeds(channel, embed.setDescription("O tempo não pode ser igual a 0").build());
+			return;
 		}
-		else{
-			embed.setDescription("o tempo não pode ser nulo ou igual a 0");
 
-			if(hook() == null){
-				channel.sendMessageEmbeds(embed.build()).queue();
-			}
-			else{
-				hook().editOriginalEmbeds(embed.build()).queue();
-			}
+		guild.timeoutFor(memberMute, time, unit).queue();
+		embed.setDescription(
+				"Usuario " + memberMute.getAsMention() + " mutado por **" + time + " " + unit.name() + "**");
+		sendMessageEmbeds(channel, embed.build());
+
+		if (config.getMuteRole() == null) {
+			return;
 		}
+
+		Role muteRole = guild.getRoleById(config.getMuteRole());
+
+		if (muteRole == null) {
+			return;
+		}
+
+		guild.addRoleToMember(memberMute, muteRole).queue();
+		guild.removeRoleFromMember(memberMute, muteRole).queueAfter(time, unit);
 	}
 
 	@Override

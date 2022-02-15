@@ -24,7 +24,8 @@ public class KanecoALRH implements AudioLoadResultHandler {
 	private boolean sendMessage;
 	private final InteractionHook hook;
 
-	public KanecoALRH(String trackUrl, InteractionHook hook, TextChannel channel, Member member, GuildMusicManager musicManager, boolean sendMessage){
+	public KanecoALRH(String trackUrl, InteractionHook hook, TextChannel channel, Member member,
+			GuildMusicManager musicManager, boolean sendMessage) {
 		this.trackUrl = trackUrl;
 		this.channel = channel;
 		this.member = member;
@@ -36,11 +37,12 @@ public class KanecoALRH implements AudioLoadResultHandler {
 
 	@Override
 	public void trackLoaded(AudioTrack track) {
-		if ( hook != null) {
-			hook.editOriginalEmbeds(KanecoUtils.defaultTrackEmbed(track, member).build()).setActionRow(KanecoUtils.defaultTrackButtons()).queue();
-		}
-		else {
-			channel.sendMessageEmbeds(KanecoUtils.defaultTrackEmbed(track, member).build()).setActionRow(KanecoUtils.defaultTrackButtons()).queue();
+		if (hook != null) {
+			hook.editOriginalEmbeds(KanecoUtils.defaultTrackEmbed(track, member).build())
+					.setActionRow(KanecoUtils.defaultTrackButtons()).queue();
+		} else {
+			channel.sendMessageEmbeds(KanecoUtils.defaultTrackEmbed(track, member).build())
+					.setActionRow(KanecoUtils.defaultTrackButtons()).queue();
 		}
 		channel.getGuild().getAudioManager().openAudioConnection(audioChannel);
 		musicManager.scheduler.queue(track);
@@ -48,50 +50,57 @@ public class KanecoALRH implements AudioLoadResultHandler {
 
 	@Override
 	public void playlistLoaded(AudioPlaylist playlist) {
-		if(trackUrl.contains("ytsearch:")) {
+		if (trackUrl.contains("ytsearch:")) {
 			AudioTrack track = playlist.getTracks().get(0);
-			if(sendMessage) {
-				if(hook == null) {
-					channel.sendMessageEmbeds(KanecoUtils.defaultTrackEmbed(track, member).build()).setActionRow(KanecoUtils.defaultTrackButtons()).queue();
-				}
-				else {
-					hook.editOriginalEmbeds(KanecoUtils.defaultTrackEmbed(track, member).build()).setActionRow(KanecoUtils.defaultTrackButtons()).queue();
+			if (sendMessage) {
+				if (hook == null) {
+					channel.sendMessageEmbeds(KanecoUtils.defaultTrackEmbed(track, member).build())
+							.setActionRow(KanecoUtils.defaultTrackButtons()).queue();
+				} else {
+					hook.editOriginalEmbeds(KanecoUtils.defaultTrackEmbed(track, member).build())
+							.setActionRow(KanecoUtils.defaultTrackButtons()).queue();
 				}
 			}
 			channel.getGuild().getAudioManager().openAudioConnection(audioChannel);
 			musicManager.scheduler.queue(track);
-		}
-		else{
+		} else {
 			channel.getGuild().getAudioManager().openAudioConnection(audioChannel);
-			for(AudioTrack track : playlist.getTracks()) {
+			for (AudioTrack track : playlist.getTracks()) {
 				musicManager.scheduler.queue(track);
 			}
-			if(hook == null){
-				channel.sendMessageEmbeds(new EmbedBuilder().setTitle("Playlist carregada.").setDescription("Foram inseridas: " + playlist.getTracks().size() + " musicas na fila.").setTimestamp(OffsetDateTime.now()).build()).queue();
-			}
-			else {
-				hook.editOriginalEmbeds(new EmbedBuilder().setTitle("Playlist carregada.").setDescription("Foram inseridas: " + playlist.getTracks().size() + " musicas na fila.").setTimestamp(OffsetDateTime.now()).build()).queue();
+			if (hook == null) {
+				channel.sendMessageEmbeds(new EmbedBuilder().setTitle("Playlist carregada.")
+						.setDescription("Foram inseridas: " + playlist.getTracks().size() + " musicas na fila.")
+						.setTimestamp(OffsetDateTime.now()).build()).queue();
+			} else {
+				hook.editOriginalEmbeds(new EmbedBuilder().setTitle("Playlist carregada.")
+						.setDescription("Foram inseridas: " + playlist.getTracks().size() + " musicas na fila.")
+						.setTimestamp(OffsetDateTime.now()).build()).queue();
 			}
 		}
 	}
 
 	@Override
 	public void loadFailed(FriendlyException exception) {
-		if(hook == null) {
-			channel.sendMessageEmbeds(new EmbedBuilder().setTitle("Erro ao carregar música.").setDescription("Não foi possível carregar a música. ERRO:\n" + exception.getMessage()).build()).queue();
-		}
-		else{
-			hook.editOriginalEmbeds(new EmbedBuilder().setTitle("Erro ao carregar música.").setDescription("Não foi possível carregar a música. ERRO:\n" + exception.getMessage()).build()).queue();
+		if (hook == null) {
+			channel.sendMessageEmbeds(new EmbedBuilder().setTitle("Erro ao carregar música.")
+					.setDescription("Não foi possível carregar a música. ERRO:\n" + exception.getMessage()).build())
+					.queue();
+		} else {
+			hook.editOriginalEmbeds(new EmbedBuilder().setTitle("Erro ao carregar música.")
+					.setDescription("Não foi possível carregar a música. ERRO:\n" + exception.getMessage()).build())
+					.queue();
 		}
 	}
 
 	@Override
 	public void noMatches() {
-		if(hook == null){
-			channel.sendMessageEmbeds(new EmbedBuilder().setTitle("Música não encontrada.").setDescription("Não foi encontrada uma música para " + trackUrl).build()).queue();
-		}
-		else{
-			hook.editOriginalEmbeds(new EmbedBuilder().setTitle("Música não encontrada.").setDescription("Não foi encontrada uma música para " + trackUrl).build()).queue();
+		if (hook == null) {
+			channel.sendMessageEmbeds(new EmbedBuilder().setTitle("Música não encontrada.")
+					.setDescription("Não foi encontrada uma música para " + trackUrl).build()).queue();
+		} else {
+			hook.editOriginalEmbeds(new EmbedBuilder().setTitle("Música não encontrada.")
+					.setDescription("Não foi encontrada uma música para " + trackUrl).build()).queue();
 		}
 	}
 }
