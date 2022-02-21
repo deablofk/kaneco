@@ -8,11 +8,14 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 
 import kaneco.api.Command;
 import kaneco.commands.config.Config;
+import kaneco.commands.levelling.Rank;
 import kaneco.commands.moderation.Ban;
 import kaneco.commands.moderation.Clear;
 import kaneco.commands.moderation.LockChannel;
+import kaneco.commands.moderation.MassBan;
 import kaneco.commands.moderation.Mute;
 import kaneco.commands.moderation.RemoveWarn;
+import kaneco.commands.moderation.Slowmode;
 import kaneco.commands.moderation.Unmute;
 import kaneco.commands.moderation.Warn;
 import kaneco.commands.moderation.Warns;
@@ -30,8 +33,10 @@ import kaneco.commands.user.Help;
 import kaneco.commands.user.ServerInfo;
 import kaneco.data.GuildConfig;
 import kaneco.data.PagedEmbed;
+import kaneco.data.UserData;
 import kaneco.music.GuildMusicManager;
 import kaneco.music.PlayerManager;
+import kaneco.utils.KanecoUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.AudioChannel;
@@ -85,20 +90,26 @@ public class KanecoListener extends ListenerAdapter {
 		COMMANDS.put("help", new Help());
 		COMMANDS.put("ban", new Ban());
 		COMMANDS.put("config", new Config());
+		COMMANDS.put("slowmode", new Slowmode());
+		COMMANDS.put("rank", new Rank());
+		COMMANDS.put("massban", new MassBan());
 	}
 
 	@Override
 	public void onMessageReceived(MessageReceivedEvent event) {
 		if (event.isFromGuild()) {
+			if (event.getAuthor().isBot())
+				return;
+
 			String msg = event.getMessage().getContentRaw();
 			GuildConfig cfg = null;
 			try {
-				cfg = Kaneco.configCache.get(event.getGuild().getId());
+				cfg = Kaneco.configCache.get(event.getGuild().getIdLong());
 			} catch (ExecutionException e) {
 				System.out.println("onMessageReceived, error on getting guild config.");
 			}
 
-			if (msg.startsWith(cfg.getGuildPrefix()) && !event.getAuthor().isBot()) {
+			if (msg.startsWith(cfg.getGuildPrefix())) {
 				String[] args = msg.split(" ");
 				String strCmd = args[0].replace(cfg.getGuildPrefix(), "").toLowerCase();
 				if (COMMANDS.containsKey(strCmd)) {
@@ -107,6 +118,18 @@ public class KanecoListener extends ListenerAdapter {
 						if (event.getMember().hasPermission(cmd.hasPermission()))
 							cmd.runCommand(event.getMember(), event.getTextChannel(), event.getGuild(), args);
 					}
+				}
+			}
+
+			long memberID = event.getMember().getIdLong();
+			if (Kaneco.cantGetXp.getIfPresent(memberID) == null) {
+				try {
+					Kaneco.cantGetXp.get(memberID);
+					UserData userData = Kaneco.userCache.get(memberID);
+					userData.setXp(userData.getXp() + KanecoUtils.randomXp(15, 45));
+					Kaneco.userCache.put(memberID, userData);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -135,7 +158,7 @@ public class KanecoListener extends ListenerAdapter {
 	@Override
 	public void onReady(ReadyEvent event) {
 		JDA gd = event.getJDA();
-		// Guild gd = event.getJDA().getGuildById("933216623404388414");
+
 		gd.upsertCommand("avatar", "mostra imagem do usuário.")
 				.addOption(OptionType.USER, "user", "usuário a mostrar imagem.").queue();
 		gd.upsertCommand("serverinfo", "mostra informações do servidor.").queue();
@@ -177,6 +200,8 @@ public class KanecoListener extends ListenerAdapter {
 				.addOption(OptionType.USER, "user", "usuário a ser banido", true)
 				.addOption(OptionType.STRING, "motivo", "motivo do banimento", true).queue();
 		gd.upsertCommand("config", "mostra as configurações do servidor.").queue();
+		gd.upsertCommand("slowmode", "aplica modo lento no canal.")
+				.addOption(OptionType.INTEGER, "tempo", "Tempo no modo lento setado em segundos. Ex: 1").queue();
 	}
 
 	@Override
@@ -253,10 +278,6 @@ public class KanecoListener extends ListenerAdapter {
 									+ "<:black_arrow_right:940445321652215829> remove <posição>- remove uma musica da queue.\n\n"
 									+ "<:black_arrow_right:940445321652215829> skip - pula para a próxima música\n\n"
 									+ "<:black_arrow_right:940445321652215829> loop - ativa repetição da playlist atual.\n\n");
-					// +"<:black_arrow_right:940445321652215829> playstart/pstart - ativa o
-					// playstart, tudo o que digitar passa a ser considerado comando de play.\n\n"
-					// +"<:black_arrow_right:940445321652215829> playstop/pstop - desativa o
-					// playstart, torna manual a adição de músicas.\n\n");
 					break;
 				case "moderation":
 					builder.setTitle("Moderação");
@@ -269,15 +290,6 @@ public class KanecoListener extends ListenerAdapter {
 									+ "<:black_arrow_right:940445321652215829> ban <@id> motivo - bane o usuario com menção ou id.\n\n"
 									+ "<:black_arrow_right:940445321652215829> lock <#channel> - tranca o canal atual o canal mencionado.\n\n"
 									+ "<:black_arrow_right:940445321652215829> clear <1-100> - limpa mensagens do canal.\n\n");
-					break;
-				case "minecraft":
-					builder.setTitle("Minecraft");
-					// builder.setDescription("<:black_arrow_right:940445321652215829> mcavatar
-					// <nick_mine_java> - mostra o avatar de uma conta minecraft.\n\n"
-					// +"<:black_arrow_right:940445321652215829> mcping <server-ip:porta> - mostra
-					// players conectados no minecraft.\n\n"
-					// +"<:black_arrow_right:940445321652215829> mcskin <nick_mine_java> - mostra a
-					// skin de uma conta minecraft.\n\n");
 					break;
 				case "users":
 					builder.setTitle("Usuário");
@@ -295,7 +307,7 @@ public class KanecoListener extends ListenerAdapter {
 	@Override
 	public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 		try {
-			GuildConfig config = Kaneco.configCache.get(event.getGuild().getId());
+			GuildConfig config = Kaneco.configCache.get(event.getGuild().getIdLong());
 			if (config.getWelcomeMessage() != null) {
 				TextChannel channel = event.getGuild().getTextChannelById(config.getWelcomeChannel());
 				if (channel != null) {
@@ -317,11 +329,23 @@ public class KanecoListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
-		if (event.getMember().equals(event.getGuild().getSelfMember())) {
-			GuildMusicManager manager = PlayerManager.getInstance().getGuildMusicManger(event.getGuild());
-			manager.scheduler.purgeQueue();
-			manager.scheduler.stop();
+		AudioChannel botChannel = event.getGuild().getSelfMember().getVoiceState().getChannel();
+
+		if (botChannel == null)
+			return;
+
+		if (botChannel != event.getChannelLeft())
+			return;
+
+		if (event.getChannelLeft().getMembers().size() > 1) {
+			return;
 		}
+
+		GuildMusicManager manager = PlayerManager.getInstance().getGuildMusicManger(event.getGuild());
+		manager.scheduler.purgeQueue();
+		manager.scheduler.stop();
+		manager.scheduler.setLoopQueue(false);
+		event.getGuild().getAudioManager().closeAudioConnection();
 	}
 
 	@Override

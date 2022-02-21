@@ -3,42 +3,35 @@ package kaneco.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.dv8tion.jda.api.entities.TextChannel;
-
 public class GuildConfig {
 
-	private String guild;
-	private String owner;
-	private List<TextChannel> blackListChannles = new ArrayList<>();
+	private Long guild;
+	private List<Long> blackListChannels = new ArrayList<>();
 	private String prefix;
 	private String welcomeMessage;
-	private String welcomeChannel;
-	private String welcomeRole;
-	private String muteRole;
-	private String banChannel;
-	private List<String> alertRoles = new ArrayList<>();
+	private Long welcomeChannel;
+	private Long welcomeRole;
+	private Long muteRole;
+	private Long banChannel;
 
-	public GuildConfig(String guildId, String ownerId, String prefix) {
+	private List<Long> alertRoles = new ArrayList<>();
+
+	public GuildConfig(long guildId, String prefix) {
 		this.guild = guildId;
-		this.owner = ownerId;
 		this.prefix = prefix;
 	}
 
-	public String getGuildId() {
+	public long getGuildId() {
 		return guild;
 	}
 
-	public String getOwnerId() {
-		return owner;
+	public List<Long> getBlackListChannles() {
+		return blackListChannels;
 	}
 
-	public List<TextChannel> getBlackListChannles() {
-		return blackListChannles;
-	}
-
-	public boolean addBlackListChannel(TextChannel txtChannel) {
-		if (!blackListChannles.contains(txtChannel)) {
-			blackListChannles.add(txtChannel);
+	public boolean addBlackListChannel(long txtChannel) {
+		if (!blackListChannels.contains(txtChannel)) {
+			blackListChannels.add(txtChannel);
 			return true;
 		}
 
@@ -61,43 +54,43 @@ public class GuildConfig {
 		this.welcomeMessage = welcomeMessage;
 	}
 
-	public String getWelcomeChannel() {
+	public Long getWelcomeChannel() {
 		return welcomeChannel;
 	}
 
-	public void setWelcomeChannel(String welcomeChannel) {
+	public void setWelcomeChannel(long welcomeChannel) {
 		this.welcomeChannel = welcomeChannel;
 	}
 
-	public String getWelcomeRole() {
+	public Long getWelcomeRole() {
 		return welcomeRole;
 	}
 
-	public void setWelcomeRole(String welcomeRole) {
+	public void setWelcomeRole(long welcomeRole) {
 		this.welcomeRole = welcomeRole;
 	}
 
-	public String getMuteRole() {
+	public Long getMuteRole() {
 		return muteRole;
 	}
 
-	public void setMuteRole(String muteRole) {
+	public void setMuteRole(long muteRole) {
 		this.muteRole = muteRole;
 	}
 
-	public String getBanChannel() {
+	public Long getBanChannel() {
 		return banChannel;
 	}
 
-	public void setBanChannel(String banChannel) {
+	public void setBanChannel(long banChannel) {
 		this.banChannel = banChannel;
 	}
 
-	public List<String> getAlertRoles() {
+	public List<Long> getAlertRoles() {
 		return alertRoles;
 	}
 
-	public void setAlertRoles(List<String> alertRoles) {
+	public void setAlertRoles(List<Long> alertRoles) {
 		this.alertRoles = alertRoles;
 	}
 }

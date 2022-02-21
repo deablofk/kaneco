@@ -46,7 +46,7 @@ public class Config extends Command {
 								TextChannel welcomeChannel = guild
 										.getTextChannelById(msgParams[3].replaceAll("[<#>]", ""));
 								if (welcomeChannel != null) {
-									cfg.setWelcomeChannel(welcomeChannel.getId());
+									cfg.setWelcomeChannel(welcomeChannel.getIdLong());
 									updated = true;
 									eb.setDescription(
 											"O canal de boas vindas foi setado para " + welcomeChannel.getAsMention());
@@ -61,7 +61,7 @@ public class Config extends Command {
 							if (msgParams.length > 3) {
 								Role role = guild.getRoleById(msgParams[3].replaceAll("[<@&>]", ""));
 								if (role != null) {
-									cfg.setWelcomeRole(role.getId());
+									cfg.setWelcomeRole(role.getIdLong());
 									updated = true;
 									eb.setDescription("O cargo de boas vindas foi setado para: " + role.getAsMention());
 								} else {
@@ -80,7 +80,7 @@ public class Config extends Command {
 					if (msgParams.length > 2) {
 						TextChannel banChannel = guild.getTextChannelById(msgParams[2].replaceAll("[<#>]", ""));
 						if (banChannel != null) {
-							cfg.setBanChannel(banChannel.getId());
+							cfg.setBanChannel(banChannel.getIdLong());
 							updated = true;
 							eb.setDescription("O canal de banimentos foi setado para: " + banChannel.getAsMention());
 						} else {
@@ -94,7 +94,7 @@ public class Config extends Command {
 					if (msgParams.length > 2) {
 						Role role = guild.getRoleById(msgParams[2].replaceAll("[<@&>]", ""));
 						if (role != null) {
-							cfg.setMuteRole(role.getId());
+							cfg.setMuteRole(role.getIdLong());
 							updated = true;
 							eb.setDescription("O cargo de mute foi setado para: " + role.getAsMention());
 						} else {
@@ -111,10 +111,10 @@ public class Config extends Command {
 						Role role3 = guild.getRoleById(msgParams[4].replaceAll("[<@&>]", ""));
 
 						if (role1 != null && role2 != null && role3 != null) {
-							List<String> alertRoles = new ArrayList<>(3);
-							alertRoles.add(role1.getId());
-							alertRoles.add(role2.getId());
-							alertRoles.add(role3.getId());
+							List<Long> alertRoles = new ArrayList<>(3);
+							alertRoles.add(role1.getIdLong());
+							alertRoles.add(role2.getIdLong());
+							alertRoles.add(role3.getIdLong());
 							cfg.setAlertRoles(alertRoles);
 							updated = true;
 							eb.setDescription("Alert Roles: " + role1.getAsMention() + " " + role2.getAsMention() + " "
@@ -169,7 +169,7 @@ public class Config extends Command {
 
 			if (updated) {
 				Kaneco.restApi.putGuildConfig(cfg);
-				Kaneco.configCache.refresh(guild.getId());
+				Kaneco.configCache.refresh(guild.getIdLong());
 			}
 		} else {
 			StringBuilder builder = new StringBuilder();
@@ -187,7 +187,7 @@ public class Config extends Command {
 			builder.append("\n<:black_arrow_right:940445321652215829> **Cargo de boas-vindas:**\n<@&"
 					+ cfg.getWelcomeRole() + ">\n");
 
-			List<String> alertRoles = cfg.getAlertRoles();
+			List<Long> alertRoles = cfg.getAlertRoles();
 			String rolesInLine = "";
 			if (alertRoles != null) {
 				for (int i = 0; i < alertRoles.size(); i++) {

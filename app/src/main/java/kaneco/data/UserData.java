@@ -4,19 +4,23 @@ import java.util.List;
 
 public class UserData {
 
-	private String user;
+	private long user;
 	private String banurl;
 	private List<WarnObject> warns;
 
-	public UserData(String user) {
+	private int xp;
+	private int level;
+	private int messages;
+
+	public UserData(long user) {
 		this.user = user;
 	}
 
-	public String getUser() {
+	public long getUser() {
 		return user;
 	}
 
-	public void setUser(String user) {
+	public void setUser(long user) {
 		this.user = user;
 	}
 
@@ -34,6 +38,30 @@ public class UserData {
 
 	public void setWarns(List<WarnObject> warns) {
 		this.warns = warns;
+	}
+
+	public int getXp() {
+		return xp;
+	}
+
+	public void setXp(int xp) {
+		this.xp = xp;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	public int getMessages() {
+		return messages;
+	}
+
+	public void setMessages(int messages) {
+		this.messages = messages;
 	}
 
 }

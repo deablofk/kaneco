@@ -41,11 +41,11 @@ public class Command implements ICommand {
 		GuildConfig config = null;
 
 		try {
-			config = Kaneco.configCache.get(guild.getId());
+			config = Kaneco.configCache.get(guild.getIdLong());
 		} catch (ExecutionException e) {
 			System.out.println("Not possible to get GuildConfig");
-			config = new GuildConfig(guild.getId(), guild.getOwnerId(), "./");
-			Kaneco.configCache.put(guild.getId(), config);
+			config = new GuildConfig(guild.getIdLong(), "./");
+			Kaneco.configCache.put(guild.getIdLong(), config);
 		}
 
 		return config;

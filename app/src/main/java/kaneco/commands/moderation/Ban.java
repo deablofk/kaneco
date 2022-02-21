@@ -24,13 +24,13 @@ public class Ban extends Command {
 
 		String reason = String.join(" ", Arrays.copyOfRange(msgParams, 2, msgParams.length));
 
-		guild.ban(memberBan, 0, "Motivo: " + reason + " | Moderador " + author.getNickname()).queue();
 		eb.addField("Usuário:", memberBan.getUser().getName(), false);
 		eb.addField("Moderador:", author.getUser().getName(), false);
 		eb.addField("Motivo:", reason, false);
 		sendMessageEmbeds(channel, eb.build());
 		memberBan.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb.build()).queue();
 
+		guild.ban(memberBan, 0, "Motivo: " + reason + " | Moderador " + author.getNickname()).queue();
 		GuildConfig cfg = config(guild);
 
 		if (cfg == null)

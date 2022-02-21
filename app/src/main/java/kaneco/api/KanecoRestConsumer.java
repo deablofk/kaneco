@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 
 import org.apache.http.HttpResponse;
@@ -36,16 +35,32 @@ public class KanecoRestConsumer {
 		System.out.println(accessToken);
 	}
 
-	public UserData getUserData(String userId) {
+	public UserData getUserData(long userId) {
 		HttpResponse hr = getApiResponse(baseURL + "/users/" + userId, "GET", accessToken, null);
-		String json = null;
-		try {
-			json = EntityUtils.toString(hr.getEntity());
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
+		int statusCode = hr.getStatusLine().getStatusCode();
+		if (statusCode == 200) {
+			String json = null;
+			try {
+				json = EntityUtils.toString(hr.getEntity());
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+			return gson.fromJson(json, UserData.class);
+		} else if (statusCode == 404) {
+			UserData userData = new UserData(userId);
+			if (postUserData(userData))
+				return userData;
 		}
-		return gson.fromJson(JsonParser.parseString(json).getAsJsonObject().get("data").getAsString(), UserData.class);
+
+		return null;
+	}
+
+	public boolean postUserData(UserData data) {
+		HttpResponse hr = getApiResponse(baseURL + "/users/", "POST", accessToken,
+				new StringEntity(gson.toJson(data), ContentType.APPLICATION_JSON));
+		int statusCode = hr.getStatusLine().getStatusCode();
+		return statusCode == 200 ? true : false;
 	}
 
 	public boolean sendUserData(UserData data) {
@@ -55,7 +70,7 @@ public class KanecoRestConsumer {
 		return statusCode == 200 ? true : false;
 	}
 
-	public GuildConfig getGuildConfig(String guildId) {
+	public GuildConfig getGuildConfig(long guildId) {
 		HttpResponse hr = getApiResponse(baseURL + "/guilds/" + guildId, "GET", accessToken, null);
 
 		int statusCode = hr.getStatusLine().getStatusCode();
@@ -69,7 +84,7 @@ public class KanecoRestConsumer {
 			}
 			return gson.fromJson(json, GuildConfig.class);
 		} else if (statusCode == 404) {
-			GuildConfig cfg = new GuildConfig(guildId, null, "./");
+			GuildConfig cfg = new GuildConfig(guildId, "./");
 			postGuildConfig(cfg);
 			return cfg;
 		}
@@ -116,7 +131,7 @@ public class KanecoRestConsumer {
 		return statusCode == 200 ? true : false;
 	}
 
-	public boolean sendWarn(String userid, WarnObject warn) {
+	public boolean sendWarn(long userid, WarnObject warn) {
 		String json = gson.toJson(warn);
 		HttpResponse hr = getApiResponse(baseURL + "/users/warn", "POST", accessToken,
 				new StringEntity(json, ContentType.APPLICATION_JSON));

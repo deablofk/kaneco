@@ -32,6 +32,9 @@ public class Warns extends Command {
 		}
 
 		eb.setTitle(member.getUser().getName());
+		if (warnMessage.isEmpty())
+			warnMessage = "O membro não possuí warns";
+
 		eb.setDescription(warnMessage);
 
 		sendMessageEmbeds(channel, eb.build());

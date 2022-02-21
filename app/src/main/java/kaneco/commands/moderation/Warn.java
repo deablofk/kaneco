@@ -34,19 +34,19 @@ public class Warn extends Command {
 		eb.addField("Motivo:", reason, false);
 
 		WarnObject obj = new WarnObject(member.getId(), guild.getId(), author.getId(), reason, null);
-		Kaneco.restApi.sendWarn(member.getId(), obj);
+		Kaneco.restApi.sendWarn(member.getIdLong(), obj);
 		member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb.build()).queue();
 
 		GuildConfig cfg = config(guild);
 		if (!cfg.getAlertRoles().isEmpty()) {
 			List<Role> memberRoles = member.getRoles();
-			List<String> alertRolesId = cfg.getAlertRoles();
+			List<Long> alertRolesId = cfg.getAlertRoles();
 
 			int warnRoles = 0;
 
 			for (int i = 0; i < memberRoles.size(); i++) {
 				for (int j = 0; j < alertRolesId.size(); j++) {
-					if (memberRoles.get(i).getId().equals(alertRolesId.get(j))) {
+					if (memberRoles.get(i).getIdLong() == alertRolesId.get(j)) {
 						warnRoles++;
 					}
 				}

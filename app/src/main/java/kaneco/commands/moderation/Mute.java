@@ -27,7 +27,7 @@ public class Mute extends Command {
 			return;
 		}
 
-		guild.timeoutFor(memberMute, time, unit).queue();
+		guild.timeoutFor(memberMute, time, unit).complete();
 		embed.setDescription(
 				"Usuario " + memberMute.getAsMention() + " mutado por **" + time + " " + unit.name() + "**");
 		sendMessageEmbeds(channel, embed.build());

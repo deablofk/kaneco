@@ -2,7 +2,10 @@ package kaneco.utils;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -12,8 +15,10 @@ import net.dv8tion.jda.api.entities.Emoji;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.utils.MiscUtil;
 
 public class KanecoUtils {
+	public static Random r = new Random();
 
 	public static EmbedBuilder defaultCmdEmbed(Member member, Member author, String cmd) {
 		EmbedBuilder eb = new EmbedBuilder();
@@ -62,6 +67,25 @@ public class KanecoUtils {
 				break;
 		}
 		return unit;
+	}
+
+	public static int randomXp(int min, int max) {
+		return r.nextInt(min, max);
+	}
+
+	public static List<Long> validateIds(Collection<String> ids) {
+		return validateIds(ids);
+	}
+
+	public static List<Long> validateIds(String... ids) {
+		List<Long> validIds = new ArrayList<>();
+		for (int i = 0; i < ids.length; i++) {
+			String id = ids[i].replaceAll("[^0-9]", "");
+			if (!id.isEmpty() && id.length() == 18)
+				validIds.add(MiscUtil.parseLong(id));
+		}
+
+		return validIds;
 	}
 
 }

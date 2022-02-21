@@ -30,6 +30,7 @@ public class Disconnect extends Command {
 		GuildMusicManager manager = PlayerManager.getInstance().getGuildMusicManger(guild);
 		manager.scheduler.purgeQueue();
 		manager.scheduler.stop();
+		manager.scheduler.setLoopQueue(false);
 		guild.getAudioManager().closeAudioConnection();
 		sendMessageEmbeds(channel, eb.setDescription("Até a próxima.").build());
 	}
