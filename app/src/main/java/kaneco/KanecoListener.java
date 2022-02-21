@@ -337,9 +337,8 @@ public class KanecoListener extends ListenerAdapter {
 		if (botChannel != event.getChannelLeft())
 			return;
 
-		if (event.getChannelLeft().getMembers().size() > 1) {
+		if (event.getChannelLeft().getMembers().size() > 1)
 			return;
-		}
 
 		GuildMusicManager manager = PlayerManager.getInstance().getGuildMusicManger(event.getGuild());
 		manager.scheduler.purgeQueue();

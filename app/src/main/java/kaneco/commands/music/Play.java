@@ -1,9 +1,7 @@
 package kaneco.commands.music;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import kaneco.Kaneco;
 import kaneco.api.Command;

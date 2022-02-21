@@ -38,7 +38,7 @@ public class MassBan extends Command {
 				svEb.appendDescription(" " + member.getAsMention());
 				eb.setDescription("**Usuário:**\n<@" + ids.get(i) + ">");
 				member.getUser().openPrivateChannel().complete().sendMessageEmbeds(eb.build()).queue();
-				guild.ban(member, 0, "Motivo: " + reason + " | Moderador " + author.getNickname()).queue();
+				guild.ban(ids.get(i) + "", 0, "Motivo: " + reason + " | Moderador " + author.getNickname()).queue();
 			}
 		}
 
