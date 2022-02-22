@@ -54,6 +54,7 @@ public class Kaneco {
 	private static void initializeApis(String token, String clientId, String clientSecret) {
 		restApi = new KanecoRestConsumer(token);
 		spotifyApi = new SpotifyApi.Builder().setClientId(clientId).setClientSecret(clientSecret).build();
+		spotifyApi.setAccessToken(spotifyApi.getAccessToken());
 	}
 
 	private static void newTokenAfterHour(String token, String clientId, String clientSecret) {

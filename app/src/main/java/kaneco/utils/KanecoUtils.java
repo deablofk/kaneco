@@ -87,4 +87,11 @@ public class KanecoUtils {
 		return validIds;
 	}
 
+	public static long validateId(String id) {
+		if (!id.isEmpty() && id.length() == 18)
+			return MiscUtil.parseLong(id.replaceAll("[^0-9]", ""));
+
+		return 0;
+	}
+
 }

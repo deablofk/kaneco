@@ -15,8 +15,18 @@ public class Rank extends Command {
 	@Override
 	public void runCommand(Member author, TextChannel channel, Guild guild, String[] msgParams) {
 		EmbedBuilder eb = KanecoUtils.defaultCmdEmbed(author, guild.getSelfMember(), " Rank");
+
+		long id = author.getIdLong();
+
+		if (msgParams.length > 1) {
+			long mentionID = KanecoUtils.validateId(msgParams[1]);
+			if (mentionID != 0) {
+				id = mentionID;
+			}
+		}
+
 		try {
-			eb.setDescription("RANK: " + Kaneco.userCache.get(author.getIdLong()).getXp());
+			eb.setDescription("RANK: " + Kaneco.userCache.get(id).getXp());
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
