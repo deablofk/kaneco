@@ -223,7 +223,7 @@ public class KanecoListener extends ListenerAdapter {
 			} else {
 				EmbedBuilder eb = new EmbedBuilder(event.getMessage().getEmbeds().get(0));
 				GuildMusicManager gmm = PlayerManager.getInstance().getGuildMusicManger(event.getGuild());
-				String name = event.getMember().getNickname();
+				String name = event.getUser().getName();
 				String avatar = event.getMember().getEffectiveAvatarUrl();
 				AudioTrack track = gmm.player.getPlayingTrack();
 				switch (event.getButton().getId()) {
