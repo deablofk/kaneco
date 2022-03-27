@@ -341,6 +341,7 @@ public class KanecoListener extends ListenerAdapter {
 			return;
 
 		GuildMusicManager manager = PlayerManager.getInstance().getGuildMusicManger(event.getGuild());
+		manager.player.setPaused(false);
 		manager.scheduler.purgeQueue();
 		manager.scheduler.stop();
 		manager.scheduler.setLoopQueue(false);
