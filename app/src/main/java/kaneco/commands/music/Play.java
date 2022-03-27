@@ -102,6 +102,9 @@ public class Play extends Command {
 		} else if (!PlayerManager.isURI(trackUrl)) {
 			PlayerManager.getInstance().loadAndPlay(hook(), channel, author, "ytsearch:" + trackUrl, true);
 		} else {
+			if(trackUrl.contains("/shorts/"))
+				trackUrl = trackUrl.replace("youtube.com/shorts/", "youtu.be/");
+
 			PlayerManager.getInstance().loadAndPlay(hook(), channel, author, trackUrl, true);
 		}
 
